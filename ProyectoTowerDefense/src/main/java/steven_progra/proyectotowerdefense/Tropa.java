@@ -29,6 +29,7 @@ public abstract class Tropa {
     public abstract double atacar(); //con el abstract puedo crear el metodo sin ingresar 
 
 }
+//Prueba 
 
 /*class Arquero extends Tropa { //sin el public puedo declarar la clase en el mismo .java
     public Arquero() {
