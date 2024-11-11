@@ -4,30 +4,27 @@ package steven_progra.proyectotowerdefense;
 //Abstract: utilizado para clase que será el modelo de otra subclase
 
 public abstract class Tropa {
-    protected double daño;  // Daño base que la tropa inflige al atacar.
-    protected String tipo;  // Tipo de tropa (ejemplo: "Arquero", "Mago", "Caballero").
-    
-    //Constructor para inicializar el tipo y daño de la tropa
-    public Tropa(String tipo, double daño) {
-        this.tipo = tipo;
-        this.daño = daño;
+    protected double ataque;
+
+    public Tropa(double ataque) {
+        this.ataque = ataque;
     }
 
-    public double getDaño() {
-        return daño;
+    // Verifica si la tropa es resistente al enemigo.
+    public abstract boolean resisteA(Tropa otra);
+
+    // Define el valor de ataque de la tropa.
+    public abstract double atacar();
+
+    // Determina si esta tropa continúa en combate en un encuentro con otra.
+    public boolean enfrenta(Tropa otra) {
+        if (this.resisteA(otra) && !otra.resisteA(this)) {
+            return true; // Esta tropa sobrevive
+        } else if (otra.resisteA(this) && !this.resisteA(otra)) {
+            return false; // Esta tropa muere
+        }
+        return false; // Ambas mueren si son iguales o ninguna es resistente
     }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    
-    //Al definir estos metodo en la super clase , me aseguro que los metodos están igualmente en las subclases
-    //Polimorfismo , lo que permite manejar objetos de diferentes subclases.
-    public abstract boolean resisteA(Tropa otra); //Parametro tipo tropa, representa otra tropa para comparar
-
-    public abstract double atacar(); //con el abstract puedo crear el metodo sin ingresar 
-
 }
 //Prueba 
 
