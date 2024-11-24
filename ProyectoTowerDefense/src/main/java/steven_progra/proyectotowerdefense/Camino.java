@@ -1,51 +1,89 @@
-
+    
 package steven_progra.proyectotowerdefense;
 
 public class Camino {
-    private Tropa[] tropasJugador;
-    private Tropa[] tropasCPU;
-    private int indiceJugador;
-    private int indiceCPU;
+    private NodoTropa inicioJugador;
+    private NodoTropa inicioCPU;
 
-    public Camino(int capacidad) {
-        this.tropasJugador = new Tropa[capacidad];
-        this.tropasCPU = new Tropa[capacidad];
-        this.indiceJugador = 0;
-        this.indiceCPU = 0;
+    public Camino() {
+        inicioJugador = null;
+        inicioCPU = null;
     }
 
-    public void añadirTropaJugador(Tropa tropa) {
-        if (indiceJugador < tropasJugador.length) {
-            tropasJugador[indiceJugador++] = tropa;
-        }
+    // Método para agregar una tropa al camino del jugador
+    public void agregarTropaJugador(Tropa tropa) {
+        inicioJugador = new NodoTropa(tropa, inicioJugador);
     }
 
-    public void añadirTropaCPU(Tropa tropa) {
-        if (indiceCPU < tropasCPU.length) {
-            tropasCPU[indiceCPU++] = tropa;
-        }
+    // Método para agregar una tropa al camino del CPU
+    public void agregarTropaCPU(Tropa tropa) {
+        inicioCPU = new NodoTropa(tropa, inicioCPU);
     }
 
-    // Resuelve el avance y el combate entre las tropas en el camino
-    public void resolverCombate(Castillo castilloJugador, Castillo castilloCPU) {
-        for (int i = 0; i < Math.max(indiceJugador, indiceCPU); i++) {
-            Tropa tropaJugador = i < indiceJugador ? tropasJugador[i] : null;
-            Tropa tropaCPU = i < indiceCPU ? tropasCPU[i] : null;
+    // Método para resolver un turno en el camino
+    public void resolverTurno() {
+        if (inicioJugador != null && inicioCPU != null) {
+            Tropa tropaJugador = inicioJugador.getTropa();
+            Tropa tropaCPU = inicioCPU.getTropa();
 
-            if (tropaJugador != null && tropaCPU != null) {
-                if (tropaJugador.enfrenta(tropaCPU)) {
-                    tropasCPU[i] = null; // La tropa del jugador continúa, la del CPU es eliminada
-                } else if (tropaCPU.enfrenta(tropaJugador)) {
-                    tropasJugador[i] = null; // La tropa del CPU continúa, la del jugador es eliminada
-                } else {
-                    tropasJugador[i] = null; // Ambas mueren
-                    tropasCPU[i] = null;
-                }
-            } else if (tropaJugador != null) {
-                castilloCPU.recibirAtaque(tropaJugador.atacar());
-            } else if (tropaCPU != null) {
-                castilloJugador.recibirAtaque(tropaCPU.atacar());
+            if (tropaJugador.resisteA(tropaCPU)) {
+                // La tropa del jugador resiste, la tropa del CPU es eliminada
+                inicioCPU = inicioCPU.getSiguiente();
+            } else if (tropaCPU.resisteA(tropaJugador)) {
+                // La tropa del CPU resiste, la tropa del jugador es eliminada
+                inicioJugador = inicioJugador.getSiguiente();
+            } else {
+                // Ambas tropas son iguales, ambas se eliminan
+                inicioJugador = inicioJugador.getSiguiente();
+                inicioCPU = inicioCPU.getSiguiente();
             }
+        }
+    }
+
+    // Método para mover las tropas restantes hacia adelante
+    public boolean avanzarTropas(Castillo castilloJugador, Castillo castilloCPU) {
+        boolean huboImpacto = false;
+
+        // Mueve las tropas del jugador
+        if (inicioJugador != null) {
+            Tropa tropa = inicioJugador.getTropa();
+            castilloCPU.recibirDaño((int) tropa.atacar());
+            inicioJugador = inicioJugador.getSiguiente();
+            huboImpacto = true;
+        }
+
+        // Mueve las tropas del CPU
+        if (inicioCPU != null) {
+            Tropa tropa = inicioCPU.getTropa();
+            castilloJugador.recibirDaño((int) tropa.atacar());
+            inicioCPU = inicioCPU.getSiguiente();
+            huboImpacto = true;
+        }
+
+        return huboImpacto;
+    }
+
+    // Método para verificar si hay tropas en el camino
+    public boolean hayTropas() {
+        return inicioJugador != null || inicioCPU != null;
+    }
+
+    // Nodo interno para manejar la lista enlazada de tropas
+    private static class NodoTropa {
+        private Tropa tropa;
+        private NodoTropa siguiente;
+
+        public NodoTropa(Tropa tropa, NodoTropa siguiente) {
+            this.tropa = tropa;
+            this.siguiente = siguiente;
+        }
+
+        public Tropa getTropa() {
+            return tropa;
+        }
+
+        public NodoTropa getSiguiente() {
+            return siguiente;
         }
     }
 }
