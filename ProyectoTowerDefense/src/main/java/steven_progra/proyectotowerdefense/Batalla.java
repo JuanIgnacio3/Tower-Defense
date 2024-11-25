@@ -1,6 +1,5 @@
 
 package steven_progra.proyectotowerdefense;
-
 public class Batalla {
     private Juego juego;
     private int rondaActual;
@@ -59,4 +58,3 @@ public class Batalla {
         juego.getCastilloCPU().reiniciarPuntosVida();
     }
 }
-
