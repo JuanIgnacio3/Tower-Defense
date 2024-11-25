@@ -32,24 +32,24 @@ public class Camino {
 
     // Avanza las tropas, resuelve combates y ataca castillos
     public boolean avanzarTropas(Castillo castilloJugador, Castillo castilloCPU) {
-        if (cabezaJugador != null && cabezaCPU != null) {
-            Tropa jugador = cabezaJugador.getTropa();
-            Tropa cpu = cabezaCPU.getTropa();
+        if (cabezaJugador != null && cabezaCPU != null) {                       //Si ambos jugadores tienen tropas, se enfrentan
+            Tropa jugador = cabezaJugador.getTropa();                           //Tropa actual
+            Tropa cpu = cabezaCPU.getTropa();                                   //Tropa actual
 
             if (jugador.resisteA(cpu)) {
-                cabezaCPU = cabezaCPU.getSiguiente();
+                cabezaCPU = cabezaCPU.getSiguiente();                           //Si la tropa del Jugador es resistente al del CPU, la del CPU es destruida
             } else if (cpu.resisteA(jugador)) {
-                cabezaJugador = cabezaJugador.getSiguiente();
+                cabezaJugador = cabezaJugador.getSiguiente();                   //Si la tropa del CPU es resistente a la del Jugar, la del jugar es destruida
             } else {
-                cabezaJugador = cabezaJugador.getSiguiente();
+                cabezaJugador = cabezaJugador.getSiguiente();                   //Si ambsa tropas son iguales, ambas se eliminan
                 cabezaCPU = cabezaCPU.getSiguiente();
             }
-        } else if (cabezaJugador != null) {
-            castilloCPU.recibirAtaque(cabezaJugador.getTropa().atacar());
+        } else if (cabezaJugador != null) {                                     //Si solo el Jugador tiene tropas restantes,
+            castilloCPU.recibirAtaque(cabezaJugador.getTropa().atacar());       //el castillo del CPU es atacado
             cabezaJugador = cabezaJugador.getSiguiente();
             return true;
-        } else if (cabezaCPU != null) {
-            castilloJugador.recibirAtaque(cabezaCPU.getTropa().atacar());
+        } else if (cabezaCPU != null) {                                         //Si solo el CPU tiene tropas restantes,
+            castilloJugador.recibirAtaque(cabezaCPU.getTropa().atacar());       //el castillo del jugador es atacado
             cabezaCPU = cabezaCPU.getSiguiente();
             return true;
         }
