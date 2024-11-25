@@ -1,12 +1,13 @@
 package steven_progra.proyectotowerdefense;
-
 class CPU {
     private String nombre;
     private boolean ganoBatalla;
+    private Castillo castillo; // Castillo asociado al CPU
 
     // Constructor
-    public CPU(String nombre) {
+    public CPU(String nombre, Castillo castillo) {
         this.nombre = nombre;
+        this.castillo = castillo;
         this.ganoBatalla = false; // Por defecto no ha ganado ninguna batalla
     }
 
@@ -25,5 +26,13 @@ class CPU {
 
     public void setGanoBatalla(boolean ganoBatalla) {
         this.ganoBatalla = ganoBatalla;
+    }
+
+    public Castillo getCastillo() {
+        return castillo;
+    }
+
+    public void setCastillo(Castillo castillo) {
+        this.castillo = castillo;
     }
 }
