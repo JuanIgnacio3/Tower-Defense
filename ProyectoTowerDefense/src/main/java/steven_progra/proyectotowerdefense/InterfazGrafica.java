@@ -7,122 +7,162 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class InterfazGrafica extends JFrame {
-    
-    private JLabel lblCastilloJugador;
-    private JLabel lblCastilloCPU;
-    private JTextArea txtCamino1;
-    private JTextArea txtCamino2;
-    private JComboBox<String> seleccionTropa;
-    private JButton btnEnviarTropa;
-    private JTextArea txtResultados;
-    private Juego juego;
+    private Batalla batalla; // Controla la lógica del juego
+    private JLabel puntosJugador;
+    private JLabel puntosCPU;
+    private JTextArea camino1Info;
+    private JTextArea camino2Info;
+    private JComboBox<String> tipoTropaSelector;
+    private JComboBox<String> caminoSelector;
+    private JButton enviarTropaBtn;
+    private JButton avanzarTurnoBtn;
+    private JTextArea logArea;
 
     public InterfazGrafica() {
-        juego = new Juego();
-        setTitle("Juego de Invasión - Tower Defense");
+        // Inicializar lógica del juego
+        batalla = new Batalla();
+
+        // Configuración básica de la ventana
+        setTitle("Tower Defense - Invasión");
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        
-        inicializarComponentes();
+
+        // Panel superior: Información de puntos de vida
+        JPanel puntosPanel = new JPanel();
+        puntosPanel.setLayout(new GridLayout(1, 2));
+        puntosJugador = new JLabel("Castillo Jugador: 10 puntos");
+        puntosCPU = new JLabel("Castillo CPU: 10 puntos");
+        puntosPanel.add(puntosJugador);
+        puntosPanel.add(puntosCPU);
+        add(puntosPanel, BorderLayout.NORTH);
+
+        // Panel central: Información de caminos
+        JPanel caminosPanel = new JPanel();
+        caminosPanel.setLayout(new GridLayout(1, 2));
+        camino1Info = new JTextArea("Camino 1:\n");
+        camino2Info = new JTextArea("Camino 2:\n");
+        camino1Info.setEditable(false);
+        camino2Info.setEditable(false);
+        caminosPanel.add(new JScrollPane(camino1Info));
+        caminosPanel.add(new JScrollPane(camino2Info));
+        add(caminosPanel, BorderLayout.CENTER);
+
+        // Panel inferior: Controles del jugador
+        JPanel controlesPanel = new JPanel();
+        controlesPanel.setLayout(new GridLayout(3, 2));
+        tipoTropaSelector = new JComboBox<>(new String[]{"Arquero", "Mago", "Caballero"});
+        caminoSelector = new JComboBox<>(new String[]{"1", "2"});
+        enviarTropaBtn = new JButton("Enviar Tropa");
+        avanzarTurnoBtn = new JButton("Avanzar Turno");
+        logArea = new JTextArea("Log de la partida:\n");
+        logArea.setEditable(false);
+
+        controlesPanel.add(new JLabel("Selecciona tipo de tropa:"));
+        controlesPanel.add(tipoTropaSelector);
+        controlesPanel.add(new JLabel("Selecciona camino:"));
+        controlesPanel.add(caminoSelector);
+        controlesPanel.add(enviarTropaBtn);
+        controlesPanel.add(avanzarTurnoBtn);
+        add(controlesPanel, BorderLayout.SOUTH);
+
+        add(new JScrollPane(logArea), BorderLayout.EAST);
+
+        // Configuración de botones
+        configurarBotones();
+
+        // Mostrar ventana
         setVisible(true);
     }
 
-    private void inicializarComponentes() {
-        // Panel superior para mostrar el estado de los castillos
-        JPanel panelEstado = new JPanel(new GridLayout(1, 2));
-        lblCastilloJugador = new JLabel("Castillo Jugador: 10 PV");
-        lblCastilloCPU = new JLabel("Castillo CPU: 10 PV");
-        panelEstado.add(lblCastilloJugador);
-        panelEstado.add(lblCastilloCPU);
-        add(panelEstado, BorderLayout.NORTH);
-
-        // Panel central para mostrar los caminos de tropas
-        JPanel panelCaminos = new JPanel(new GridLayout(2, 1));
-        txtCamino1 = new JTextArea("Camino 1");
-        txtCamino2 = new JTextArea("Camino 2");
-        txtCamino1.setEditable(false);
-        txtCamino2.setEditable(false);
-        panelCaminos.add(new JScrollPane(txtCamino1));
-        panelCaminos.add(new JScrollPane(txtCamino2));
-        add(panelCaminos, BorderLayout.CENTER);
-
-        // Panel inferior para acciones del jugador
-        JPanel panelAcciones = new JPanel(new GridLayout(2, 1));
-        
-        // Selección de tropas
-        JPanel panelSeleccionTropas = new JPanel(new FlowLayout());
-        seleccionTropa = new JComboBox<>(new String[]{"Arquero", "Mago", "Caballero"});
-        btnEnviarTropa = new JButton("Enviar Tropa");
-        panelSeleccionTropas.add(new JLabel("Selecciona Tropa:"));
-        panelSeleccionTropas.add(seleccionTropa);
-        panelSeleccionTropas.add(btnEnviarTropa);
-        panelAcciones.add(panelSeleccionTropas);
-
-        // Resultado de la batalla
-        txtResultados = new JTextArea(5, 20);
-        txtResultados.setEditable(false);
-        panelAcciones.add(new JScrollPane(txtResultados));
-        add(panelAcciones, BorderLayout.SOUTH);
-
-        // Acción de enviar tropa
-        btnEnviarTropa.addActionListener(new ActionListener() {
+    private void configurarBotones() {
+        // Enviar tropa
+        enviarTropaBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                enviarTropa();
+                String tipoTropa = (String) tipoTropaSelector.getSelectedItem();
+                int caminoElegido = Integer.parseInt((String) caminoSelector.getSelectedItem());
+                Tropa tropa;
+
+                // Crear la tropa seleccionada
+                switch (tipoTropa) {
+                    case "Arquero":
+                        tropa = new Arquero();
+                        break;
+                    case "Mago":
+                        tropa = new Mago();
+                        break;
+                    case "Caballero":
+                        tropa = new Caballero();
+                        break;
+                    default:
+                        return;
+                }
+
+                // Enviar la tropa al camino seleccionado
+                batalla.enviarTropaJugador(tropa, caminoElegido);
+                logArea.append("Tropa enviada: " + tipoTropa + " al camino " + caminoElegido + "\n");
+                actualizarInformacionCaminos();
+            }
+        });
+
+        // Avanzar turno
+        avanzarTurnoBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                batalla.ejecutarTurno();
+                logArea.append("Turno ejecutado\n");
+
+                if (batalla.verificarDerrotaJugador()) {
+                    JOptionPane.showMessageDialog(null, "¡Perdiste! Tu castillo fue destruido.");
+                    System.exit(0);
+                }
+
+                if (batalla.verificarVictoriaJugador()) {
+                    JOptionPane.showMessageDialog(null, "¡Ganaste la batalla!");
+                    batalla.siguienteRonda();
+                    actualizarInformacionCaminos();
+                }
+
+                actualizarPuntosDeVida();
             }
         });
     }
 
-    private void enviarTropa() {
-        String tipoTropa = (String) seleccionTropa.getSelectedItem();
-        Tropa tropa = crearTropa(tipoTropa);
-
-        // Lógica para agregar la tropa al camino (simplificada)
-        txtResultados.append("Has enviado un " + tipoTropa + "\n");
-        actualizarCaminos(tipoTropa, tropa);
-        iniciarRonda();
+    private void actualizarPuntosDeVida() {
+        puntosJugador.setText("Castillo Jugador: " + batalla.getJuego().getCastilloJugador().getPuntosVida() + " puntos");
+        puntosCPU.setText("Castillo CPU: " + batalla.getJuego().getCastilloCPU().getPuntosVida() + " puntos");
     }
 
-    private Tropa crearTropa(String tipoTropa) {
-        switch (tipoTropa) {
-            case "Arquero":
-                return new Arquero();
-            case "Mago":
-                return new Mago();
-            case "Caballero":
-                return new Caballero();
-            default:
-                return null;
-        }
+    private void actualizarInformacionCaminos() {
+        // Actualizar información de los caminos (esto requeriría mostrar las tropas de ambos caminos)
+        camino1Info.setText("Camino 1:\n" + obtenerEstadoCamino(batalla.getJuego().getCamino1()));
+        camino2Info.setText("Camino 2:\n" + obtenerEstadoCamino(batalla.getJuego().getCamino2()));
     }
 
-    private void actualizarCaminos(String tipoTropa, Tropa tropa) {
-        // Agrega visualmente la tropa al camino seleccionado
-        if (Math.random() < 0.5) {
-            txtCamino1.append("\n" + tipoTropa);
-        } else {
-            txtCamino2.append("\n" + tipoTropa);
+    private String obtenerEstadoCamino(Camino camino) {
+        // Mostrar la información de las tropas en el camino
+        StringBuilder estado = new StringBuilder();
+        NodoTropa actualJugador = camino.getCabezaJugador(); // Se debe crear un método `getCabezaJugador`
+        NodoTropa actualCPU = camino.getCabezaCPU(); // Se debe crear un método `getCabezaCPU`
+
+        estado.append("Jugador:\n");
+        while (actualJugador != null) {
+            estado.append(actualJugador.getTropa().getClass().getSimpleName()).append("\n");
+            actualJugador = actualJugador.getSiguiente();
         }
-    }
 
-    private void iniciarRonda() {
-        // Realiza una ronda de la batalla
-        juego.iniciarJuego();
-
-        // Actualiza el estado de los castillos
-        lblCastilloJugador.setText("Castillo Jugador: " + juego.getCastilloJugador().getPuntosDeVida() + " PV");
-        lblCastilloCPU.setText("Castillo CPU: " + juego.getCastilloCPU().getPuntosDeVida() + " PV");
-
-        // Verifica el estado del juego
-        if (juego.getCastilloCPU().estaDestruido()) {
-            txtResultados.append("¡Has ganado la batalla!\n");
-        } else if (juego.getCastilloJugador().estaDestruido()) {
-            txtResultados.append("Has sido derrotado. Fin del juego.\n");
+        estado.append("CPU:\n");
+        while (actualCPU != null) {
+            estado.append(actualCPU.getTropa().getClass().getSimpleName()).append("\n");
+            actualCPU = actualCPU.getSiguiente();
         }
+
+        return estado.toString();
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new InterfazGrafica());
+        new InterfazGrafica();
     }
 }
+
